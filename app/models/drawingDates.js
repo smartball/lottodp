@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const TicketSchema = new mongoose.Schema({
+const DrawingDateSchema = new mongoose.Schema({
   id: Number,
   user_id: Number,
   path: String,
@@ -25,7 +25,7 @@ const TicketSchema = new mongoose.Schema({
   affiliate: Number,
   over_amount: Number
 }, {
-  collection: 'tickets'
+  collection: 'drawing_dates'
 })
 
-export default mongoose.model('Ticket', TicketSchema)
+export default mongoose.model('DrawingDate', DrawingDateSchema)

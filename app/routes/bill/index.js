@@ -1,6 +1,5 @@
 import express from 'express'
-import getBillById from './getBillById'
-import deleteBill from './deleteBill'
+import { getBillById, deleteBill } from './controllers'
 
 const router = express.Router()
 
