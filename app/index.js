@@ -1,10 +1,10 @@
-import bill from '@routes/bill'
-import { healthCheck } from '@routes/helloworld'
-import ticket from '@routes/ticket'
-import logger from '@utils/logger'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import express from 'express'
+import billController from 'routes/bill'
+import { healthCheck } from 'routes/helloworld'
+import ticketController from 'routes/ticket'
+import logger from 'utils/logger'
 import { config } from './config'
 import createConnection from './database/connection'
 import auth from './middlewares/auth'
@@ -27,5 +27,5 @@ app.listen(config.port, (error) => {
 })
 
 app.get('/', healthCheck)
-app.use('/api/bill', bill)
-app.use('/api/ticket', ticket)
+app.use('/api/bill', billController)
+app.use('/api/ticket', ticketController)
