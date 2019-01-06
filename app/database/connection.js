@@ -11,11 +11,11 @@ const options = {
 }
 
 const createConnection = async () => {
-  const [error, connection] = await to(mongoose.connect(uri, options))
-  if (error) logger.error('Error on create connection: ', error.message)
-  const { connections: [db] } = connection
-  const { host, port } = db
-  logger.info(`[ Connect database on ${host}:${port} ]`)
+  // const [error, connection] = await to(mongoose.connect(uri, options))
+  // if (error) logger.error('Error on create connection: ', error.message)
+  // const { connections: [db] } = connection
+  // const { host, port } = db
+  // logger.info(`[ Connect database on ${host}:${port} ]`)
 }
 
 export default createConnection

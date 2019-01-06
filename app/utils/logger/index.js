@@ -6,14 +6,14 @@ let logger
 if (config.stage === 'develop') {
   logger = console
 } else {
-  const papertrailTransport = new winston.transports.Papertrail({
-    host: config.host,
-    port: config.port
-  })
+  // const papertrailTransport = new winston.transports.Papertrail({
+  //   host: config.host,
+  //   port: config.port
+  // })
 
-  logger = new winston.Logger({
-    transports: [papertrailTransport]
-  })
+  // logger = new winston.Logger({
+  //   transports: [papertrailTransport]
+  // })
 }
 
 export default logger

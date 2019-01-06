@@ -1,6 +1,5 @@
 export { default as withMasterDrawingDate } from './masterDrawingDate'
 export { default as drawingDateThai } from './drawingDateThai'
-export { default as drawingDateLaos } from './drawingDateLaos'
 export { default as drawingChinaAfternoon } from './drawingDateChinaAfternoon'
 export { default as drawingChainaMorning } from './drawingDateChinaMorning'
 export { default as drawingDaily } from './drawingDateDaily'

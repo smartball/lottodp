@@ -14,13 +14,13 @@ const middleware = [
   cors(),
   bodyParser.urlencoded({ extended: false }),
   bodyParser.json(),
-  auth
+  // auth
 ]
 
 app.use(middleware)
-app.listen(config.port, (error) => {
+app.listen(3001, (error) => {
   if (error) {
-    logger.error(error)
+    // logger.error(error)
     process.exit(1)
   }
   createConnection()
@@ -29,3 +29,4 @@ app.listen(config.port, (error) => {
 app.get('/', healthCheck)
 app.use('/api/bill', billController)
 app.use('/api/ticket', ticketController)
+app.use('/api/credit', (req, res) => res.json('try test path credit'))
