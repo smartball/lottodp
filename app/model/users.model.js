@@ -1,0 +1,35 @@
+import mongoose, { Schema } from "mongoose"
+
+const users = new Schema({
+    id: Number,
+    parent_id: Number,
+    root_id: Number,
+    path: String,
+    position: String,
+    init_credit: Number,
+    remaining_credit: Number,
+    child_credit: Number,
+    bet: Number,
+    own_amount: Number,
+    recieve_amount: Number,
+    send_amount: Number,
+    is_active: Number,
+    is_banned: Number,
+    currency: String,
+    deleted_at: String,
+    created_at: String,
+    updated_at: String,
+    invite_code: String,
+    my_code: String,
+    line: String,
+    call_center: String,
+    bank_account: String,
+    email: String,
+    affiliate_percentage: Number,
+    affiliate_income: Number,
+    affiliate_expense: Number,
+    template_id: Number,
+    default_affilidate_template_id: Number,
+})
+
+module.exports = mongoose.model('users', users)

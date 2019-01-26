@@ -4,6 +4,7 @@ import express from 'express'
 import billController from 'routes/bill'
 import { healthCheck } from 'routes/helloworld'
 import ticketController from 'routes/ticket'
+import creditController from 'routes/credit'
 import logger from 'utils/logger'
 import { config } from './config'
 import createConnection from './database/connection'
@@ -29,4 +30,4 @@ app.listen(3001, (error) => {
 app.get('/', healthCheck)
 app.use('/api/bill', billController)
 app.use('/api/ticket', ticketController)
-app.use('/api/credit', (req, res) => res.json('try test path credit'))
+app.use('/api/credit', creditController)
