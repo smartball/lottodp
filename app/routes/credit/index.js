@@ -9,7 +9,6 @@ router.post('/', async (req, res) => {
 
   if (req.body.method) {
     const response = await handleAPI(req.body, res)
-    console.log(response)
     res.json(response)
   }
   else {

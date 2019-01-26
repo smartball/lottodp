@@ -25,75 +25,93 @@ export const initUserCredit = (credit, me, user) => {
   return reData
 }
 
-export const updateUserCredit = (credit, dataUser, myLoginName, member) => {
+export const updateUserCredit = (credit, myLoginName, me, user) => {
   let res = {}
   if (credit > 0) {
     if (myLoginName === 'manual.config') {
-      if (dataUser.remaining_credit < credit) {
-        res = {
+      if (me.remaining_credit < credit) {
+        return {
+          message: {
+            transaction_id: 123,
+            data: {},
+            statusCode: 200,
+            successful: false,
+            error_code: 1,
+            message: 'วงเงินของคุณไม่พอสำหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
+          },
+          me, user
+        }
+      }
+      me.remaining_credit -= credit
+      me.child_credit += credit
+    }
+    user.init_credit += credit
+    user.remaining_credit += credit
+  } else {
+    const pCredit = (-1) * credit
+    if (user.remaining_credit < pCredit) {
+      return {
+        message: {
           transaction_id: 123,
           data: {},
           statusCode: 200,
           successful: false,
-          error_code: 1,
-          message: 'วงเงินของคุณไม่พอสหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
-        }
-      }
-      dataUser.remaining_credit -= credit
-      dataUser.child_credit += credit
-    }
-    member.init_credit += credit
-    member.remaining_credit += credit
-  } else {
-    const pCredit = (-1) * credit
-    if (member.remaining_credit < pCredit) {
-      res = {
-        transaction_id: 123,
-        data: {},
-        statusCode: 200,
-        successful: false,
-        error_code: 2,
-        message: 'ไม่สามารถถอนเกินวงเงินของสมาชิกได้'
+          error_code: 2,
+          message: 'ไม่สามารถถอนเกินวงเงินของสมาชิกได้'
+        },
+        me, user
       }
     }
     if (myLoginName === 'manual.config') {
-      dataUser.remaining_credit -= pCredit
-      dataUser.child_credit += pCredit
+      me.remaining_credit -= pCredit
+      me.child_credit += pCredit
     }
-    member.init_credit += pCredit
-    member.remaining_credit += pCredit
+    user.init_credit += pCredit
+    user.remaining_credit += pCredit
   }
-  return res
+  me.updated_at = moment().utcOffset(7).format('YYYY-MM-DD HH:mm:ss')
+  user.updated_at = moment().utcOffset(7).format('YYYY-MM-DD HH:mm:ss')
+  const reData = {
+    message: {
+      transaction_id: 123,
+      data: {},
+      statusCode: 200,
+      successful: true,
+      message: 'โอนเงินสำเร็จ'
+    },
+    me, user
+  }
+  return reData
 }
 
-export const addTicket = (member, amount) => {
+export const addTicket = (user, amount) => {
   let res = {}
-  if (member.remaining_credit < amount) {
+  if (user.remaining_credit < amount) {
     res = {
       successful: false,
       error_code: 1,
       message: 'เครดิตไม่พอ'
     }
   } else {
-    member.remaining_credit -= amount
-    member.bet += amount
+    user.remaining_credit -= amount
+    user.bet += amount
     res = {
       successful: true,
       message: 'หักเครดิตสมบูรณ์',
-      uncommited_object: member
+      uncommited_object: user
     }
   }
   // เหลือต่อกับ db
   return res
 }
 
-export const ticketCompensate = (member, ticket) => {
-  member.send_amount += (ticket.arrearage - ticket.bet)
-  member.own_amount = (member.recieve_amount - member.send_amount)
+export const ticketCompensate = (user, ticket) => {
+  user.send_amount += (ticket.arrearage - ticket.bet)
+  user.own_amount = (user.recieve_amount - user.send_amount)
 
   /// arrearage = ผลตอบแทนรวมต้น
-  member.remaining_credit += ticket.arrearage
-  member.bet -= ticket.bet
+  user.remaining_credit += ticket.arrearage
+  user.bet -= ticket.bet
   const res = {
     transaction_id: 123,
     successful: true,
@@ -102,11 +120,11 @@ export const ticketCompensate = (member, ticket) => {
   return res
 }
 
-export const summaryCompensate = (member, summary) => {
-  member.recieve_amount += (-1) * summary.receive_amount
-  member.own_amount += (-1) * summary.own_amount
-  member.send_amount += (-1) * summary.send_amount
-  member.remaining_credit += (-1) * summary.send_amount
+export const summaryCompensate = (user, summary) => {
+  user.recieve_amount += (-1) * summary.receive_amount
+  user.own_amount += (-1) * summary.own_amount
+  user.send_amount += (-1) * summary.send_amount
+  user.remaining_credit += (-1) * summary.send_amount
 
   // เหลือต่อกับ db
   const res = {
@@ -117,104 +135,109 @@ export const summaryCompensate = (member, summary) => {
   return res
 }
 
-export const tranfer = (amount, dataUser, member) => {
+export const tranferAmount = (amount, me, user) => {
   let res = {}
-  if (member.remaining_credit < amount) {
-    res = {
-      transaction_id: 123,
-      successful: false,
-      error_code: 2,
-      message: 'เครดิตไม่พอ'
+  if (user.remaining_credit < amount) {
+    return {
+      message: {
+        transaction_id: 123,
+        successful: false,
+        error_code: 2,
+        message: 'เครดิตไม่พอ'
+      }, me, user
     }
-  } else {
-    res = {
+  }
+  me.recieve_amount -= amount
+  user.send_amount -= amount
+  user.remaining_credit -= amount
+
+  me.own_amount = me.recieve_amount - me.send_amount
+  user.own_amount = user.recieve_amount - user.send_amount
+  // เหลือต่อกับ db
+
+  return {
+    message: {
       transaction_id: 123,
       successful: true,
       message: 'หักเครดิตสมบูรณ์'
-    }
+    }, me, user
   }
-  dataUser.recieve_amount -= amount
-  member.send_amount -= amount
-  member.remaining_credit -= amount
-
-  dataUser.own_amount = dataUser.recieve_amount - dataUser.send_amount
-  member.own_amount = member.recieve_amount - member.send_amount
-  // เหลือต่อกับ db
-
-  return res
 }
 
-export const tranferAffiliate = (request, dataUser, member) => {
-  const send_amount = member.send_amount
+export const tranferAffiliate = (credit, me, user) => {
+  const send_amount = user.send_amount
   let res = {
     transaction_id: 123,
     successful: true,
     message: 'โอนเงินสำเร็จ'
   }
-  if (dataUser.remaining_credit < send_amount) {
-    res = {
-      transaction_id: 123,
-      successful: false,
-      error_code: 1,
-      message: 'วงเงินของคุณไม่พอสหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
+  if (me.remaining_credit < send_amount) {
+    return {
+      message: {
+        transaction_id: 123,
+        successful: false,
+        error_code: 1,
+        message: 'วงเงินของคุณไม่พอสำหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
+      }, me, user
     }
-    return res
   }
-  if (dataUser.remaining_credit < 0) {
-    res = {
-      transaction_id: 123,
-      successful: false,
-      error_code: 2,
-      message: 'วงเงินของคุณไม่พอสหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
+  if (me.remaining_credit < 0) {
+    return {
+      message: {
+        transaction_id: 123,
+        successful: false,
+        error_code: 2,
+        message: 'วงเงินของคุณไม่พอสำหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
+      }, me, user
     }
-    return res
   }
+  me.remaining_credit -= send_amount
+  me.child_credit += send_amount
+  user.init_credit += send_amount
 
-  dataUser.remaining_credit -= send_amount
-  dataUser.child_credit += send_amount
-  member.init_credit += send_amount
+  me.recieve_amount -= send_amount
+  user.send_amount -= send_amount
 
-  dataUser.recieve_amount -= send_amount
-  member.send_amount -= send_amount
-
-  dataUser.own_amount = dataUser.recieve_amount - dataUser.send_amount
-  member.own_amount = member.recieve_amount - member.send_amount
+  me.own_amount = me.recieve_amount - me.send_amount
+  user.own_amount = user.recieve_amount - user.send_amount
 
   // Update Credit
-  const credit = request.credit
+
   if (credit >= 0) {
     ///user deposit
-    if (dataUser.remaining_credit < credit) {
-      res = {
-        transaction_id: 123,
-        successful: false,
-        error_code: 3,
-        message: 'วงเงินของคุณไม่พอสหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
+    if (me.remaining_credit < credit) {
+      return {
+        message: {
+          transaction_id: 123,
+          successful: false,
+          error_code: 3,
+          message: 'วงเงินของคุณไม่พอสำหรับโอนเงินให้สมาชิกที่อยู่ภายใต้คุณ'
+        }, me, user
       }
-      return res
     }
-    dataUser.remaining_credit -= credit;
-    dataUser.child_credit += credit;
+    me.remaining_credit -= credit;
+    me.child_credit += credit;
 
-    member.init_credit += credit;
-    member.remaining_credit += credit;
+    user.init_credit += credit;
+    user.remaining_credit += credit;
   } else {
     const pCredit = (-1) * credit
-    if (member.remaining_credit < pCredit) {
-      res = {
-        transaction_id: 123,
-        successful: false,
-        error_code: 4,
-        message: 'ไม่สามารถถอนเกินวงเงินของสมาชิกได้'
+    if (user.remaining_credit < pCredit) {
+      return {
+        message: {
+          transaction_id: 123,
+          successful: false,
+          error_code: 4,
+          message: 'ไม่สามารถถอนเกินวงเงินของสมาชิกได้'
+        }, me, user
       }
-      return res
     }
-    dataUser.remaining_credit += pCredit;
-    dataUser.child_credit -= pCredit;
+    me.remaining_credit += pCredit;
+    me.child_credit -= pCredit;
 
-    member.init_credit -= pCredit;
-    member.remaining_credit -= pCredit;
+    user.init_credit -= pCredit;
+    user.remaining_credit -= pCredit;
   }
   // เหลือต่อกับ db
-  return res
+  return { message: res, me, user }
 }
