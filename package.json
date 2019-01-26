@@ -33,5 +33,6 @@
     "babel-register": "^6.26.0",
     "nodemon": "^1.18.4",
     "rimraf": "^2.6.2"
-  }
+  },
+  "heroku-postbuild" : "babel server.js -d ./dist -s"
 }
